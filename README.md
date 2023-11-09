@@ -1,3 +1,3 @@
 # WatermarkDeleter
 
-yarn echo start
+yarn expo start
