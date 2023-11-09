@@ -1,0 +1,3 @@
+# WatermarkDeleter
+
+yarn echo start
