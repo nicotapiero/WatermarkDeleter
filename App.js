@@ -1,9 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Image, View, Platform, TextInput, StyleSheet, Text} from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { manipulateAsync, FlipType, SaveFormat } from 'expo-image-manipulator';
-import * as MediaLibrary from 'expo-media-library';
-
+import React, { useState, useEffect } from "react";
+import {
+  Button,
+  Image,
+  View,
+  Platform,
+  TextInput,
+  StyleSheet,
+  Text,
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { manipulateAsync, FlipType, SaveFormat } from "expo-image-manipulator";
+import * as MediaLibrary from "expo-media-library";
 
 const styles = StyleSheet.create({
   input: {
@@ -16,25 +23,18 @@ const styles = StyleSheet.create({
 
 export default function App() {
   const [image, setImage] = useState(null);
-
-  const [albumName, onChangeAlbumName] = React.useState('Memes');
-
+  //don't use the progress variable, it's kind of a piece of crap. Use it for reading in React rendering code, not in normal use
+  const [progress, setProgress] = useState(0);
+  const [albumName, onChangeAlbumName] = React.useState("Memes");
   const [isSelected, setSelection] = useState(true);
-
-
-
   const [permissionResponse, requestPermission] = MediaLibrary.usePermissions();
 
-console.log('hiii', permissionResponse)
-
   const pickImage = async () => {
+    requestPermission();
 
-    requestPermission()
-
-    if (permissionResponse.accessPrivileges !== 'all') {
-      console.log('give me access')
-
-      return 
+    if (permissionResponse.accessPrivileges !== "all") {
+      console.log("give me access");
+      return;
     }
 
     // No permissions request is necessary for launching the image library
@@ -45,74 +45,74 @@ console.log('hiii', permissionResponse)
       quality: 1,
       selectionLimit: 0,
       allowsMultipleSelection: true,
+      orderedSelection: true,
     });
 
-    console.log(result);
-
-
     if (!result.canceled) {
-
+      var delta = (1 / result.assets.length) * 100;
+      setProgress(0);
+      var currentProgress = 0;
       for (const asset of result.assets) {
-
-        console.log(asset);
-        console.log('hi')
-
-
         let manipResult = await manipulateAsync(
-      asset.uri,
-      [{crop: {
-  height: asset.height-20, 
-  originX: 0, 
-  originY: 0, 
-  width: asset.width
-}}],
-      { compress: 1, format: SaveFormat.PNG }
-    );
-      console.log('result', manipResult)
+          asset.uri,
+          [
+            {
+              crop: {
+                height: asset.height - 20,
+                originX: 0,
+                originY: 0,
+                width: asset.width,
+              },
+            },
+          ],
+          { compress: 1, format: SaveFormat.PNG }
+        );
+        const editedAsset = await MediaLibrary.createAssetAsync(
+          manipResult.uri
+        );
 
-      const editedAsset = await MediaLibrary.createAssetAsync(manipResult.uri);
+        // let res = await MediaLibrary.isAvailableAsync();
+        let prom = await MediaLibrary.getAlbumsAsync();
 
-      let res = await MediaLibrary.isAvailableAsync()
+        let album = await MediaLibrary.getAlbumAsync(albumName);
+        if (album === null) {
+          // create the album if it doesn't already exist
+          album = await MediaLibrary.createAlbumAsync(albumName);
+        }
 
-      console.log('rest ', res)
+        // add option to saving to album, allow user to set album name
+        await MediaLibrary.addAssetsToAlbumAsync(editedAsset, album);
 
-
-      let prom = await MediaLibrary.getAlbumsAsync();
-      console.log('hey', prom)
-
-      let album = await MediaLibrary.getAlbumAsync(albumName);
-      if (album === null) {
-        album = await MediaLibrary.createAlbumAsync(albumName);
+        //update status bar
+        currentProgress += delta;
+        setProgress(currentProgress);
       }
-      
-      console.log('whaat', album)
 
-      // add option to saving to album, allow user to set album name
-      let res2 = await MediaLibrary.addAssetsToAlbumAsync(editedAsset, album)    
-      }
+      setProgress(Math.round(currentProgress)); // lie to them
+
 
       // delete photos, also make an option
       let ids = result.assets.map((asset) => asset.assetId);
-      await MediaLibrary.deleteAssetsAsync(ids)
+      await MediaLibrary.deleteAssetsAsync(ids);
     }
   };
 
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-    <Text >
-        {'Album Name to Save To:'}
-      </Text>
-
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+      <Text>{"Album Name to Save To:"}</Text>
 
       <TextInput
-      style={styles.input}
+        style={styles.input}
         value={albumName}
         onChangeText={onChangeAlbumName}
       />
 
       <Button title="Pick images from camera roll" onPress={pickImage} />
-      {image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
+      {image && (
+        <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />
+      )}
+
+      <Text>{progress} % complete</Text>
     </View>
   );
 }
-
