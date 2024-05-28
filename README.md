@@ -1,3 +1,3 @@
 # WatermarkDeleter
 
-yarn expo start
+npx expo start
