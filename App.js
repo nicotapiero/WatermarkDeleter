@@ -98,7 +98,7 @@ export default function App() {
   };
 
   return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "white" }}>
       <Text>{"Album Name to Save To:"}</Text>
 
       <TextInput
