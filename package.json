@@ -9,14 +9,15 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@types/react": "~18.3.12",
-    "expo": "~52.0.10",
+    "@types/react": "~18.2.79",
+    "expo": "^52.0.11",
+    "expo-dev-client": "~5.0.4",
     "expo-image-manipulator": "~13.0.5",
-    "expo-image-picker": "~16.0.3",
-    "expo-media-library": "~17.0.2",
-    "expo-updates": "~0.26.9",
-    "react": "18.3.1",
-    "react-native": "0.76.2"
+    "expo-image-picker": "~15.0.7",
+    "expo-media-library": "~16.0.5",
+    "expo-updates": "~0.25.27",
+    "react": "18.2.0",
+    "react-native": "0.74.5"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0"
